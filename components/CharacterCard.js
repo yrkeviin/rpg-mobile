@@ -1,14 +1,30 @@
-// components/CharacterCard.js
-import React, { useState } from "react";
-import { StyleSheet } from "react-native";
-import { Card, Text, Portal, Modal, Button } from "react-native-paper";
-import { MaterialIcons } from '@expo/vector-icons';
+
+import React, { useState, useRef } from "react";
+import { View, Text, TouchableOpacity, Modal, StyleSheet, Pressable } from "react-native";
 
 export default function CharacterCard({ character, onToggleRecruit, onRemoveCharacter }) {
   const [removeModalVisible, setRemoveModalVisible] = useState(false);
+  const timerRef = useRef(null);
 
-  const handleLongPress = () => {
-    setRemoveModalVisible(true);
+  const handlePressIn = () => {
+    timerRef.current = setTimeout(() => {
+      setRemoveModalVisible(true);
+    }, 800);
+  };
+
+  const handlePressOut = () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+  };
+
+  const handlePress = () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+    onToggleRecruit(character);
   };
 
   const confirmRemove = () => {
@@ -22,142 +38,165 @@ export default function CharacterCard({ character, onToggleRecruit, onRemoveChar
 
   return (
     <>
-      <Card 
+      <Pressable
         style={[
-          styles.card, 
-          character.recruited && styles.cardRecruited
+          styles.card,
+          character.recruited ? styles.cardRecruited : styles.cardAvailable
         ]}
-        onPress={() => onToggleRecruit(character)}
-        onLongPress={handleLongPress}
+        onPress={handlePress}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
       >
-        <Card.Content style={styles.cardContent}>
-          <Text 
-            style={[
-              styles.characterText, 
-              character.recruited && styles.characterRecruitedText
-            ]}
-          >
+        <View style={styles.row}>
+          <Text style={[
+            styles.name,
+            character.recruited ? styles.nameRecruited : styles.nameAvailable
+          ]}>
             {character.name}
           </Text>
-          <Text style={styles.status}>
+          <Text style={styles.statusIcon}>
             {character.recruited ? "⭐" : "💤"}
           </Text>
-        </Card.Content>
-      </Card>
+        </View>
+      </Pressable>
 
-      <Portal>
-        <Modal 
-          visible={removeModalVisible} 
-          onDismiss={cancelRemove}
-          contentContainerStyle={styles.modal}
-        >
-          <MaterialIcons 
-            name="warning" 
-            size={48} 
-            color="#C5282F" 
-            style={styles.warningIcon}
-          />
-          <Text style={styles.modalTitle}>Remover Personagem</Text>
-          <Text style={styles.modalText}>
-            Tem certeza que deseja remover "{character.name}" da party?
-          </Text>
-          <Text style={styles.modalSubText}>
-            Esta ação não pode ser desfeita.
-          </Text>
-          <Card.Actions style={styles.modalButtons}>
-            <Button 
-              mode="outlined" 
-              onPress={cancelRemove}
-              textColor="#F4E4BC"
-              style={styles.modalButton}
-            >
-              Cancelar
-            </Button>
-            <Button 
-              mode="contained" 
-              onPress={confirmRemove}
-              buttonColor="#C5282F"
-              textColor="#F4E4BC"
-              style={styles.modalButton}
-              icon={() => <MaterialIcons name="delete" size={16} color="#F4E4BC" />}
-            >
-              Remover
-            </Button>
-          </Card.Actions>
-        </Modal>
-      </Portal>
+      <Modal
+        visible={removeModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={cancelRemove}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalWarning}>⚠️</Text>
+            <Text style={styles.modalTitle}>Remover Personagem</Text>
+            <Text style={styles.modalText}>
+              Tem certeza que deseja remover "{character.name}" da party?
+            </Text>
+            <Text style={styles.modalDanger}>Esta ação não pode ser desfeita.</Text>
+            <View style={styles.modalButtons}>
+              <TouchableOpacity onPress={cancelRemove} style={styles.cancelButton}>
+                <Text style={styles.cancelButtonText}>Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={confirmRemove} style={styles.removeButton}>
+                <Text style={styles.removeButtonText}>🗑️ Remover</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "#2C1810",
+    borderRadius: 8,
     marginBottom: 10,
-    borderWidth: 1,
-    borderColor: "#58180D",
+    cursor: 'pointer',
+    userSelect: 'none',
   },
   cardRecruited: {
-    backgroundColor: "#58180D",
-    borderColor: "#E69A28",
+    backgroundColor: '#58180D',
     borderWidth: 2,
+    borderColor: '#E69A28',
   },
-  cardContent: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 15,
+  cardAvailable: {
+    backgroundColor: '#2C1810',
+    borderWidth: 1,
+    borderColor: '#58180D',
   },
-  characterText: {
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 15,
+  },
+  name: {
     flex: 1,
     fontSize: 16,
-    color: "#F4E4BC",
-    fontWeight: "500",
   },
-  characterRecruitedText: {
-    color: "#E69A28",
-    fontWeight: "bold",
+  nameRecruited: {
+    color: '#E69A28',
+    fontWeight: 'bold',
   },
-  status: {
+  nameAvailable: {
+    color: '#F4E4BC',
+    fontWeight: '500',
+  },
+  statusIcon: {
     fontSize: 20,
     marginLeft: 10,
   },
-  modal: {
-    backgroundColor: "#2C1810",
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalContent: {
+    backgroundColor: '#2C1810',
     padding: 20,
     margin: 20,
     borderRadius: 10,
-    borderColor: "#C5282F",
     borderWidth: 2,
+    borderColor: '#C5282F',
+    maxWidth: '90%',
+    alignItems: 'center',
   },
-  warningIcon: {
-    alignSelf: "center",
+  modalWarning: {
+    fontSize: 48,
+    color: '#C5282F',
     marginBottom: 15,
   },
   modalTitle: {
     fontSize: 20,
-    fontWeight: "bold",
-    color: "#C5282F",
-    textAlign: "center",
+    fontWeight: 'bold',
+    color: '#C5282F',
     marginBottom: 10,
   },
   modalText: {
     fontSize: 16,
-    color: "#F4E4BC",
-    textAlign: "center",
+    color: '#F4E4BC',
     marginBottom: 10,
+    textAlign: 'center',
   },
-  modalSubText: {
+  modalDanger: {
     fontSize: 14,
-    color: "#C5282F",
-    textAlign: "center",
+    color: '#C5282F',
     marginBottom: 20,
+    textAlign: 'center',
   },
   modalButtons: {
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     gap: 10,
   },
-  modalButton: {
+  cancelButton: {
+    backgroundColor: 'transparent',
+    borderColor: '#F4E4BC',
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
     flex: 1,
+    marginRight: 8,
+    alignItems: 'center',
+  },
+  cancelButtonText: {
+    color: '#F4E4BC',
+    fontWeight: 'bold',
+  },
+  removeButton: {
+    backgroundColor: '#C5282F',
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    flex: 1,
+    alignItems: 'center',
+  },
+  removeButtonText: {
+    color: '#F4E4BC',
+    fontWeight: 'bold',
   },
 });

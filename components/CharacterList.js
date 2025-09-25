@@ -1,45 +1,41 @@
-// components/CharacterList.js
+
 import React from "react";
-import { FlatList, StyleSheet } from "react-native";
-import { Text } from "react-native-paper";
+import { View, Text, StyleSheet } from "react-native";
 import CharacterCard from "./CharacterCard";
 
 export default function CharacterList({ characters, onToggleRecruit, onRemoveCharacter }) {
-  const renderCharacter = ({ item }) => (
-    <CharacterCard
-      character={item}
-      onToggleRecruit={onToggleRecruit}
-      onRemoveCharacter={onRemoveCharacter}
-    />
-  );
-
   if (characters.length === 0) {
     return (
-      <Text style={styles.emptyText}>
-        Nenhum personagem encontrado 🔍
-      </Text>
+      <View style={styles.emptyContainer}>
+        <Text style={styles.emptyText}>Nenhum personagem encontrado 🔍</Text>
+      </View>
     );
   }
 
   return (
-    <FlatList
-      data={characters}
-      keyExtractor={(item) => String(item.id)}
-      renderItem={renderCharacter}
-      style={styles.list}
-      showsVerticalScrollIndicator={false}
-    />
+    <View style={styles.listContainer}>
+      {characters.map((item) => (
+        <CharacterCard
+          key={item.id}
+          character={item}
+          onToggleRecruit={onToggleRecruit}
+          onRemoveCharacter={onRemoveCharacter}
+        />
+      ))}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  list: {
-    flex: 1,
+  listContainer: {
+    width: '100%',
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    marginTop: 50,
   },
   emptyText: {
-    textAlign: "center",
-    color: "#C5282F",
+    color: '#C5282F',
     fontSize: 16,
-    marginTop: 50,
   },
 });

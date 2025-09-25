@@ -1,8 +1,5 @@
-// components/AddCharacterForm.js
 import React, { useState } from "react";
-import { View, StyleSheet } from "react-native";
-import { TextInput, Button, Portal, Modal, Text } from "react-native-paper";
-import { MaterialIcons } from '@expo/vector-icons';
+import { View, Text, TextInput, TouchableOpacity, Modal, StyleSheet } from "react-native";
 
 export default function AddCharacterForm({ onAddCharacter }) {
   const [newCharacter, setNewCharacter] = useState("");
@@ -34,105 +31,78 @@ export default function AddCharacterForm({ onAddCharacter }) {
           value={newCharacter}
           onChangeText={setNewCharacter}
           onSubmitEditing={handleAddCharacter}
-          mode="outlined"
-          outlineColor="#E69A28"
-          activeOutlineColor="#E69A28"
-          textColor="#1A0E0A"
-          theme={{
-            colors: {
-              background: "#F4E4BC",
-              onSurfaceVariant: "#1A0E0A"
-            }
-          }}
+          placeholderTextColor="#A67C52"
         />
-        <Button
-          mode="contained"
-          onPress={handleAddCharacter}
-          style={styles.button}
-          buttonColor="#C5282F"
-          textColor="#E69A28"
-          icon={() => <MaterialIcons name="person-add" size={20} color="#E69A28" />}
-        >
-          
-        </Button>
+        <TouchableOpacity onPress={handleAddCharacter} style={styles.button}>
+          <Text style={styles.buttonText}>+</Text>
+        </TouchableOpacity>
       </View>
-
-      <Portal>
-        <Modal 
-          visible={modalVisible} 
-          onDismiss={cancelAdd}
-          contentContainerStyle={styles.modal}
-        >
-          <Text style={styles.modalTitle}>Confirmar Adição</Text>
-          <Text style={styles.modalText}>
-            Deseja adicionar "{newCharacter}" à sua party?
-          </Text>
-          <View style={styles.modalButtons}>
-            <Button 
-              mode="outlined" 
-              onPress={cancelAdd}
-              style={styles.modalButton}
-              textColor="#C5282F"
-            >
-              Cancelar
-            </Button>
-            <Button 
-              mode="contained" 
-              onPress={confirmAdd}
-              style={styles.modalButton}
-              buttonColor="#E69A28"
-              textColor="#1A0E0A"
-            >
-              Adicionar
-            </Button>
+      <Modal
+        visible={modalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={cancelAdd}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Adicionar personagem?</Text>
+            <Text style={styles.modalText}>{newCharacter}</Text>
+            <View style={styles.modalButtons}>
+              <TouchableOpacity onPress={confirmAdd} style={styles.confirmButton}>
+                <Text style={styles.confirmButtonText}>Adicionar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={cancelAdd} style={styles.cancelButton}>
+                <Text style={styles.cancelButtonText}>Cancelar</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </Modal>
-      </Portal>
+        </View>
+      </Modal>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   inputRow: {
-    flexDirection: "row",
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 20,
     gap: 10,
   },
   input: {
     flex: 1,
+    backgroundColor: '#F4E4BC',
+    color: '#1A0E0A',
+    borderColor: '#E69A28',
+    borderWidth: 2,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    fontSize: 16,
   },
   button: {
-    justifyContent: "center",
-    borderColor: "#E69A28",
-    borderWidth: 2,
+    backgroundColor: '#C5282F',
+    borderRadius: 8,
+    padding: 10,
+    minWidth: 40,
+    minHeight: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  modal: {
-    backgroundColor: "#2C1810",
-    padding: 20,
-    margin: 20,
-    borderRadius: 10,
-    borderColor: "#E69A28",
-    borderWidth: 2,
+  confirmButtonText: {
+    color: '#1A0E0A',
+    fontWeight: 'bold',
   },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#E69A28",
-    textAlign: "center",
-    marginBottom: 10,
+  cancelButton: {
+    backgroundColor: 'transparent',
+    borderColor: '#C5282F',
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
   },
-  modalText: {
-    fontSize: 16,
-    color: "#F4E4BC",
-    textAlign: "center",
-    marginBottom: 20,
-  },
-  modalButtons: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    gap: 10,
-  },
-  modalButton: {
-    flex: 1,
-  },
+  cancelButtonText: {
+    color: '#C5282F',
+    fontWeight: 'bold',
+  }
 });
